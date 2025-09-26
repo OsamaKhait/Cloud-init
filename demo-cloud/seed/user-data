@@ -1,0 +1,31 @@
+#cloud-config
+disable_root: true
+ssh_pwauth: false
+package_update: true
+packages:
+  - bash
+users:
+  # Utilisateur "ubuntu" (par défaut sur Ubuntu cloud)
+  - name: ubuntu
+    gecos: Ubuntu
+    groups: [adm, sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFnz3BXaUs6ODm9Wd6AY+iaFe7xdhFVh7/uGZ+CY1glA osama@khait.fr
+  # Camarade demandé
+  - name: camarade
+    gecos: Camarade
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFnz3BXaUs6ODm9Wd6AY+iaFe7xdhFVh7/uGZ+CY1glA osama@khait.fr
+ssh:
+  emit_keys_to_console: false
+  allow_users: [ubuntu, camarade]
+# UFW basique (optionnel)
+#runcmd:
+#  - [ bash, -lc, "ufw allow OpenSSH && ufw --force enable" ]
