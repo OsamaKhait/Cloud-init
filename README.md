@@ -1,6 +1,6 @@
 # VM Cloud-Init avec QEMU (macOS)
 
-## 🎯 Objectifs
+## Objectifs
 - Démarrer une VM Ubuntu Cloud (via QEMU) sur macOS.
 - Restreindre l’accès SSH **uniquement par clé** (pas de mot de passe).
 - Interdire `root` en SSH.
@@ -9,7 +9,7 @@
 
 ---
 
-## 📂 Scripts
+## Scripts
 
 ### 1. `prep_cloud_vm.sh`
 Ce script :
@@ -29,7 +29,7 @@ Ce script :
 
 ---
 
-## 🚀 Utilisation
+## Utilisation
 
 1. Cloner le projet :
    ```bash
@@ -54,7 +54,7 @@ Ce script :
 
 ---
 
-## ➕ Ajouter un utilisateur supplémentaire
+## Ajouter un utilisateur supplémentaire
 
 Exemple pour créer un nouvel utilisateur `etudiant1` avec une clé SSH :
 
@@ -75,7 +75,7 @@ ssh -p 2222 etudiant1@<IP_HOTE>
 
 ---
 
-## 🛑 Arrêt et gestion
+## Arrêt et gestion
 
 - Arrêt propre dans la VM :
   ```bash
@@ -89,7 +89,7 @@ ssh -p 2222 etudiant1@<IP_HOTE>
 
 ---
 
-## ⚠️ Notes
+## Notes
 - Testé sur macOS avec QEMU (`arm64` / Apple Silicon).
 - Le projet peut être adapté pour Debian, Rocky Linux ou Alpine en changeant l’URL de l’image cloud dans `prep_cloud_vm.sh`.
 - Vérifiez vos réglages de pare-feu si vous voulez permettre l’accès à d’autres machines sur le réseau.
