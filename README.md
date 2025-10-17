@@ -93,3 +93,124 @@ ssh -p 2222 etudiant1@<IP_HOTE>
 - Testé sur macOS avec QEMU (`arm64` / Apple Silicon).
 - Le projet peut être adapté pour Debian, Rocky Linux ou Alpine en changeant l’URL de l’image cloud dans `prep_cloud_vm.sh`.
 - Vérifiez vos réglages de pare-feu si vous voulez permettre l’accès à d’autres machines sur le réseau.
+
+
+
+
+# README – Déploiement VM QEMU + Ansible + MySQL
+
+Ce projet montre comment automatiser la configuration d’une VM Ubuntu lancée via **QEMU** (port SSH 2222) avec **Ansible**, en installant MySQL et en important un jeu de données DNS.
+
+---
+
+## 🧰 Pré-requis
+- VM Ubuntu en marche sur `localhost:2222`
+- Clé SSH valide (chargée avec `ssh-agent` ou sans passphrase)
+- Ansible installé sur la machine hôte (macOS)
+- Collection `community.mysql` installée
+
+```bash
+brew install ansible
+ansible-galaxy collection install community.mysql
+```
+
+---
+
+## 📁 Arborescence du projet
+```
+vm-cloud/
+└─ ansible/
+   ├─ ansible.cfg
+   ├─ inventory.ini
+   ├─ site.yml
+   └─ roles/
+      ├─ common/
+      │  ├─ tasks/main.yml
+      │  └─ handlers/main.yml
+      └─ mysql/
+         ├─ defaults/main.yml
+         └─ tasks/main.yml
+```
+
+---
+
+## ⚙️ Configuration Ansible
+
+### `ansible.cfg`
+- Définit l’inventaire local
+- Active `become` par défaut
+- Configure le répertoire temporaire
+
+### `inventory.ini`
+Contient la VM QEMU :
+```ini
+[demo]
+demo-cloud ansible_host=127.0.0.1 ansible_port=2222
+
+[demo:vars]
+ansible_user=camarade
+ansible_ssh_private_key_file=~/.ssh/id_ed25519
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_common_args=-o IdentitiesOnly=yes
+```
+
+---
+
+## 🧱 Rôles
+
+### `common`
+- Met à jour `apt`
+- Installe des paquets de base (curl, git, htop, ufw…)
+- Active le pare-feu UFW
+- Définit le hostname
+- Prépare `/opt/tools`
+
+### `mysql`
+- Installe MySQL et ses dépendances (`python3-pymysql`)
+- Démarre et active MySQL
+- Crée une base `dns` et un utilisateur `dnsuser`
+- Télécharge un dump SQL DNS de test (gist)
+- Remplace `TYPE=` → `ENGINE=` pour compatibilité MySQL 8+
+- Importe le dump dans la base
+
+---
+
+## ▶️ Exécution
+```bash
+cd ansible
+ansible-inventory --list --yaml   # Vérifier l’inventaire
+ansible all -m ping               # Tester SSH
+ansible-playbook site.yml         # Déployer Common + MySQL + Import
+```
+
+---
+
+## ✅ Vérifications
+```bash
+# MySQL actif ?
+ansible all -a "systemctl is-active mysql"
+
+# Base créée ?
+ansible all -m shell -a 'mysql -S /var/run/mysqld/mysqld.sock -e "SHOW DATABASES LIKE \"dns\";"' --become
+
+# Tables importées ?
+ansible all -m shell -a 'mysql -S /var/run/mysqld/mysqld.sock -D dns -e "SHOW TABLES;"' --become
+```
+
+---
+
+## 🧰 Dépannage
+- **Permission denied (publickey)** → vérifier `ssh-agent` et inventaire.
+- **Python introuvable** → installer `python3` dans la VM.
+- **404 dump** → corriger `mysql_dump_url`.
+- **Import SQL** → bien faire les remplacements `TYPE=` → `ENGINE=`.
+
+---
+
+## 📝 Auteurs
+- Osama Khait — BTS SIO 2e année
+
+---
+
+📄 **Ce README.md peut être livré au professeur comme documentation du projet.**
+
