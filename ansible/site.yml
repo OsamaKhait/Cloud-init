@@ -1,0 +1,10 @@
+---
+- name: Configure demo-cloud
+  hosts: demo
+  become: true
+  collections:
+    - community.mysql
+    
+  roles:
+    - common
+    - mysql

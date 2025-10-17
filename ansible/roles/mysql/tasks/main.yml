@@ -1,0 +1,75 @@
+---
+- name: Install MySQL server and client deps
+  apt:
+    name:
+      - mysql-server
+      - mysql-client
+      - python3-pymysql     # requis par community.mysql
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: true
+  become: true
+
+- name: Ensure MySQL is started and enabled
+  service:
+    name: mysql
+    state: started
+    enabled: true
+  become: true
+
+- name: Create application database
+  community.mysql.mysql_db:
+    name: "{{ mysql_db_name }}"
+    state: present
+    login_unix_socket: "{{ mysql_socket }}"
+  become: true
+
+- name: Create application user with privileges
+  community.mysql.mysql_user:
+    name: "{{ mysql_app_user }}"
+    password: "{{ mysql_app_password }}"
+    priv: "{{ mysql_db_name }}.*:ALL"
+    host: "%"
+    state: present
+    login_unix_socket: "{{ mysql_socket }}"
+  become: true
+
+- name: Create staging dir for SQL dump
+  file:
+    path: /tmp/mysql-import
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Download sample DNS SQL dump
+  get_url:
+    url: "{{ mysql_dump_url }}"
+    dest: /tmp/mysql-import/dns.sql
+    mode: "0644"
+  become: true
+
+# ✅ Tâches de normalisation
+- name: Normalize engine syntax (InnoDB)
+  replace:
+    path: /tmp/mysql-import/dns.sql
+    regexp: 'TYPE=InnoDB'
+    replace: 'ENGINE=InnoDB'
+  become: true
+
+- name: Normalize engine syntax (MyISAM)
+  replace:
+    path: /tmp/mysql-import/dns.sql
+    regexp: 'TYPE=MyISAM'
+    replace: 'ENGINE=MyISAM'
+  become: true
+
+# Ensuite seulement on importe le fichier
+- name: Import sample data into database
+  community.mysql.mysql_db:
+    name: "{{ mysql_db_name }}"
+    state: import
+    target: /tmp/mysql-import/dns.sql
+    login_unix_socket: "{{ mysql_socket }}"
+  become: true
+

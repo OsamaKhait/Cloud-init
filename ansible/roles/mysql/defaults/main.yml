@@ -1,0 +1,6 @@
+---
+mysql_db_name: dns
+mysql_app_user: dnsuser
+mysql_app_password: dnsP@ssw0rd   # change si tu veux
+mysql_dump_url: "https://gist.githubusercontent.com/Habbie/5466890/raw/26fd90e69a500d3581bde8b43d2ea8149432655b/dump.sql"
+mysql_socket: /var/run/mysqld/mysqld.sock

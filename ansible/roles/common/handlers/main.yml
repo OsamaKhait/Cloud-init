@@ -1,0 +1,5 @@
+---
+- name: reload ufw
+  listen: reload ufw
+  command: ufw reload
+  changed_when: false

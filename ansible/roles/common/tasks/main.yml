@@ -1,0 +1,57 @@
+---
+- name: Ensure apt cache is up to date
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Base packages
+  apt:
+    name:
+      - curl
+      - git
+      - htop
+      - ufw
+      - ca-certificates
+    state: present
+
+- name: Configure uncomplicated firewall (allow SSH)
+  ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    policy: deny
+  notify: reload ufw
+
+- name: Set hostname explicitly (optional)
+  hostname:
+    name: demo-cloud
+
+- name: Ensure /etc/hosts contains hostname
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s+'
+    line: '127.0.1.1 demo-cloud'
+    state: present
+
+- name: Create /opt/tools directory
+  file:
+    path: /opt/tools
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install MySQL server
+  apt:
+    name: mysql-server
+    state: present
+    update_cache: true
+
+- name: Ensure MySQL is started and enabled
+  service:
+    name: mysql
+    state: started
+    enabled: true

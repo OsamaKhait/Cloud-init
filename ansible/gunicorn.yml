@@ -1,0 +1,9 @@
+- name: Installer gunicorn (exemple doc)
+  hosts: demo
+  become: yes
+  tasks:
+    - name: Install gunicorn
+      apt:
+        name: gunicorn
+        state: present
+        update_cache: true
