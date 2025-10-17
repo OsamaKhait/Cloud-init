@@ -207,10 +207,5 @@ ansible all -m shell -a 'mysql -S /var/run/mysqld/mysqld.sock -D dns -e "SHOW TA
 
 ---
 
-## 📝 Auteurs
-- Osama Khait — BTS SIO 2e année
-
----
-
 📄 **Ce README.md peut être livré au professeur comme documentation du projet.**
 
